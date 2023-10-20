@@ -16,47 +16,89 @@ function printTasks() {
 }
 
 function addTask(description) {
-  tasks.push({ description, completed: false });
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      tasks.push({ description, completed: false });
+      resolve();
+    }, 1000);
+  });
 }
 
 function deleteTask(index) {
-  if (index >= 0 && index < tasks.length) {
-    tasks.splice(index, 1);
-  }
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (index >= 0 && index < tasks.length) {
+        tasks.splice(index, 1);
+        resolve();
+      } else {
+        reject('Índice de tarea no válido.');
+      }
+    }, 1000);
+  });
 }
 
 function completeTask(index) {
-  if (index >= 0 && index < tasks.length) {
-    tasks[index].completed = true;
-  }
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (index >= 0 && index < tasks.length) {
+        tasks[index].completed = true;
+        resolve();
+      } else {
+        reject('Índice de tarea no válido.');
+      }
+    }, 1000);
+  });
 }
 
-rl.question('¿Qué acción deseas realizar? (add/delete/complete/exit): ', (action) => {
+async function main() {
+  const action = await ask('¿Qué acción deseas realizar? (add/delete/complete/exit): ');
+
   if (action === 'exit') {
     console.log('Adiós.');
     rl.close();
   } else if (action === 'add') {
-    rl.question('Escribe la descripción de la tarea: ', (description) => {
-      addTask(description);
+    const description = await ask('Escribe la descripción de la tarea: ');
+    try {
+      await addTask(description);
       printTasks();
+    } catch (error) {
+      console.log(error);
+    } finally {
       rl.close();
-    });
+    }
   } else if (action === 'delete') {
     printTasks();
-    rl.question('Escribe el número de la tarea que deseas eliminar: ', (index) => {
-      deleteTask(index - 1); // Restamos 1 para ajustar al índice del array
+    const index = await ask('Escribe el número de la tarea que deseas eliminar: ');
+    try {
+      await deleteTask(index - 1); // Restamos 1 para ajustar al índice del array
       printTasks();
+    } catch (error) {
+      console.log(error);
+    } finally {
       rl.close();
-    });
+    }
   } else if (action === 'complete') {
     printTasks();
-    rl.question('Escribe el número de la tarea que deseas marcar como completada: ', (index) => {
-      completeTask(index - 1); // Restamos 1 para ajustar al índice del array
+    const index = await ask('Escribe el número de la tarea que deseas marcar como completada: ');
+    try {
+      await completeTask(index - 1); // Restamos 1 para ajustar al índice del array
       printTasks();
+    } catch (error) {
+      console.log(error);
+    } finally {
       rl.close();
-    });
+    }
   } else {
     console.log('Acción no válida. Por favor, elige una acción válida.');
     rl.close();
   }
-});
+}
+
+function ask(question) {
+  return new Promise((resolve) => {
+    rl.question(question, resolve);
+  });
+}
+
+console.log('Bienvenido a la Lista de Tareas.');
+main();
